@@ -1,3 +1,3 @@
-import startScene from './demos/clickedPoints'
+import startScene from './demos/draw'
 
 startScene();
