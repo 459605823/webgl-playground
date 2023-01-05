@@ -1,3 +1,3 @@
-import startScene from './demos/tiny'
+import startScene from './demos/clickedPoints'
 
 startScene();
