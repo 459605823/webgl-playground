@@ -1,7 +1,9 @@
 import * as twgl from 'twgl.js';
-import vertexShader from '@/shaders/clickedPoints/vertex.glsl?raw';
-import fragmentShader from '@/shaders/clickedPoints/fragment.glsl?raw';
-import {getWebGLCoordinate, randFloat} from '@/utils';
+import pointVertexShader from '@/shaders/clickedPoints/vertex.glsl?raw';
+import pointFragmentShader from '@/shaders/clickedPoints/fragment.glsl?raw';
+import lineVextexShader from '@/shaders/line/vertex.glsl?raw';
+import lineFragmentShader from '@/shaders/line/fragment.glsl?raw';
+import {getWebGLCoordinate, randFloat, handleResize} from '@/utils';
 
 export default () => {
   const canvas = document.querySelector('#c') as HTMLCanvasElement;
@@ -9,9 +11,13 @@ export default () => {
   if (!gl) {
     return;
   }
-  const programInfo = twgl.createProgramInfo(gl, [
-    vertexShader,
-    fragmentShader,
+  const pointProgram = twgl.createProgramInfo(gl, [
+    pointVertexShader,
+    pointFragmentShader,
+  ]);
+  const lineProgram = twgl.createProgramInfo(gl, [
+    lineVextexShader,
+    lineFragmentShader,
   ]);
   const arrays: Record<string, any> = {
     a_position: {numComponents: 3, data: []},
@@ -25,26 +31,6 @@ export default () => {
   let pointCount = 0;
   canvas.onmousedown = (e) => {
     isDrawing = !isDrawing;
-    pointCount += 1;
-    const {x, y} = getWebGLCoordinate(
-      e.clientX,
-      e.clientY,
-      left,
-      top,
-      width,
-      height
-    );
-    arrays.a_position.data.push(x, y, 0);
-    arrays.a_size.data.push(randFloat(10, 20));
-    arrays.a_color.data.push(
-      randFloat(0.1, 1),
-      randFloat(0.1, 1),
-      randFloat(0.1, 1)
-    );
-    render();
-  };
-  canvas.onmousemove = (e) => {
-    if (!isDrawing) return;
     const {x, y} = getWebGLCoordinate(
       e.clientX,
       e.clientY,
@@ -60,21 +46,44 @@ export default () => {
     arrays.a_color.data[pointCount * 3] = randFloat(0.1, 1);
     arrays.a_color.data[pointCount * 3 + 1] = randFloat(0.1, 1);
     arrays.a_color.data[pointCount * 3 + 2] = randFloat(0.1, 1);
+    pointCount += 1;
     render();
   };
+  canvas.onmousemove = (e) => {
+    if (!isDrawing) return;
+    const {x, y} = getWebGLCoordinate(
+      e.clientX,
+      e.clientY,
+      left,
+      top,
+      width,
+      height
+    );
+    arrays.a_position.data[pointCount * 3] = x;
+    arrays.a_position.data[pointCount * 3 + 1] = y;
+    arrays.a_position.data[pointCount * 3 + 2] = 0;
+    arrays.a_size.data[pointCount] = 10;
+    arrays.a_color.data[pointCount * 3] = 1;
+    arrays.a_color.data[pointCount * 3 + 1] = 1;
+    arrays.a_color.data[pointCount * 3 + 2] = 1;
+    render();
+  };
+  handleResize(gl);
+  window.addEventListener('resize', handleResize.bind(null, gl));
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   function render() {
     if (!gl) {
       return;
     }
-    twgl.resizeCanvasToDisplaySize(gl.canvas as HTMLCanvasElement);
+
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
-    gl.useProgram(programInfo.program);
-    twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
+    gl.useProgram(pointProgram.program);
+    twgl.setBuffersAndAttributes(gl, pointProgram, bufferInfo);
     twgl.drawBufferInfo(gl, bufferInfo, gl.POINTS);
-    twgl.drawBufferInfo(gl, bufferInfo, gl.LINES);
+    gl.useProgram(lineProgram.program);
+    twgl.setBuffersAndAttributes(gl, lineProgram, bufferInfo);
+    twgl.drawBufferInfo(gl, bufferInfo, gl.LINE_LOOP);
   }
 };
