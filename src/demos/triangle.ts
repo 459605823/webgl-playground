@@ -11,7 +11,8 @@ export default () => {
   const programInfo = twgl.createProgramInfo(gl, [vertexShader, fragmentShader]);
 
   const arrays = {
-    a_position: [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0],
+    a_position: {numComponents: 3, data: [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0]},
+    a_color: {numComponents: 3, data: [1, 0, 0, 0, 1, 0, 0, 0, 1]}
   };
   const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
   gl.useProgram(programInfo.program);
@@ -27,19 +28,25 @@ export default () => {
     lastTime = now;
     deg = (deg + ((45 * deltaTime) / 1000)) % 360;
     const mat = twgl.m4.rotationZ(degToRad(deg));
-    twgl.m4.translate(mat, [1, 0, 0], mat);
+    twgl.m4.translate(mat, [0, 0, 0], mat);
     twgl.m4.scale(mat, [0.5, 0.5, 0.5], mat);
 
     const uniforms = {
       u_Matrix: mat,
+      u_width: gl.drawingBufferWidth,
+      u_height: gl.drawingBufferHeight,
     };
+    console.log(gl.drawingBufferWidth, gl.drawingBufferHeight)
     gl.clear(gl.COLOR_BUFFER_BIT);
     twgl.setUniforms(programInfo, uniforms);
     twgl.drawBufferInfo(gl, bufferInfo, gl.TRIANGLES);
-    requestAnimationFrame(render);
+    // requestAnimationFrame(render);
   }
   handleResize(gl);
-  window.addEventListener("resize", handleResize.bind(null, gl));
+  window.addEventListener("resize", () => {
+    handleResize(gl)
+    console.log(gl.drawingBufferWidth, gl.drawingBufferHeight);
+  });
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   render();

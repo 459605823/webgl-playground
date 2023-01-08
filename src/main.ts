@@ -1,3 +1,3 @@
-import startScene from './demos/triangle'
+import startScene from './demos/texture'
 
 startScene();
