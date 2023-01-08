@@ -17,14 +17,23 @@ export default () => {
     },
     uv: { numComponents: 2, data: [0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0] },
   };
-  const texture = twgl.createTexture(
+  const texture = twgl.createTextures(
     gl,
     {
-      src: "https://threejs.org/examples/textures/uv_grid_opengl.jpg",
-      crossOrigin: "anonymous",
-      flipY: 1,
-      min: gl.NEAREST,
-      mag: gl.NEAREST,
+      base: {
+        src: "https://threejs.org/examples/textures/uv_grid_opengl.jpg",
+        crossOrigin: "anonymous",
+        flipY: 1,
+        min: gl.NEAREST,
+        mag: gl.NEAREST,
+      },
+      cover: {
+        src: "/circle.gif",
+        crossOrigin: "anonymous",
+        flipY: 1,
+        min: gl.NEAREST,
+        mag: gl.NEAREST,
+      },
     },
     (err) => {
       if (!err) {
@@ -41,7 +50,8 @@ export default () => {
     }
 
     const uniforms = {
-      u_texture: texture,
+      u_texture: texture.base,
+      u_cover: texture.cover,
       u_matrix: twgl.m4.scale(twgl.m4.identity(), [1.5, 1.5, 1.5]),
     };
     gl.clear(gl.COLOR_BUFFER_BIT);
