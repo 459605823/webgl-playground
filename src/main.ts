@@ -1,3 +1,3 @@
-import startScene from './demos/texture'
+import startScene from './demos/orthoView'
 
 startScene();
