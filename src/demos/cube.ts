@@ -20,8 +20,9 @@ export default () => {
   //  | |v7---|-|v4
   //  |/      |/
   //  v2------v3
+  const vertices  = twgl.primitives.createCubeVertices(2);
+  twgl.primitives.makeRandomVertexColors(vertices);
   const arrays = {
-    //prettier-ignore
     position: [
       1.0, 1.0, 1.0, // v0
       -1.0, 1.0, 1.0, // v1
@@ -55,7 +56,7 @@ export default () => {
       4,7,6, 4,6,5, // back
     ],
   };
-  const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
+  const bufferInfo = twgl.createBufferInfoFromArrays(gl, vertices);
   const projection = twgl.m4.perspective(degToRad(30), canvas.clientWidth / canvas.clientHeight, 1, 100);
   const camera = twgl.m4.lookAt([3, 3, 7], [0, 0, 0], [0, 1, 0]);
   const view = twgl.m4.inverse(camera);
