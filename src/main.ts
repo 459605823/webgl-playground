@@ -1,3 +1,3 @@
-import startScene from './demos/cube'
+import startScene from './demos/pointLight'
 
 startScene();
