@@ -1,3 +1,3 @@
-import startScene from './demos/draw'
+import startScene from './demos/scene'
 
 startScene();

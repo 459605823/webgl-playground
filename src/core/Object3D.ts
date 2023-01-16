@@ -5,6 +5,8 @@ const {m4, v3} = twgl
 export class Object3D {
   type = 'Object3D'
 
+  name = ''
+
   children: Object3D[] = []
 
   parent: Object3D | null = null
@@ -16,6 +18,8 @@ export class Object3D {
   rotation: twgl.v3.Vec3 = v3.create(0, 0, 0)
 
   scale: twgl.v3.Vec3 = v3.create(1, 1, 1)
+
+  visible = true
 
   get localMatrix() {
     const matrix = m4.translation(this.position)
