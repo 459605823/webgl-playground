@@ -30,3 +30,5 @@ export const randIntSpread = (range: number) => {
 export const degToRad = (degrees: number) => {
   return degrees * Math.PI / 180;
 }
+
+export const isPowerOf2 = (value: number) => (value & (value - 1)) == 0;
