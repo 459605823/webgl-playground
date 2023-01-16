@@ -13,13 +13,26 @@ export class Object3D {
 
   worldMatrix: twgl.m4.Mat4 = m4.identity()
 
+  modelViewMatrix: twgl.m4.Mat4 = m4.identity()
+
+  normalMatrix: twgl.m4.Mat4 = m4.identity()
+
   position: twgl.v3.Vec3 = v3.create(0, 0, 0)
 
   rotation: twgl.v3.Vec3 = v3.create(0, 0, 0)
 
   scale: twgl.v3.Vec3 = v3.create(1, 1, 1)
 
+  up: twgl.v3.Vec3 = v3.create(0, 1, 0)
+
+  uuid: string
+
   visible = true
+
+  constructor() {
+    this.uuid = Math.random().toString(36).slice(2)
+    this.updateWorldMatrix()
+  }
 
   get localMatrix() {
     const matrix = m4.translation(this.position)

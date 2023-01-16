@@ -1,8 +1,7 @@
 import * as twgl from "twgl.js";
 import vertexShader from "@/shaders/scene/vertex.glsl?raw";
 import fragmentShader from "@/shaders/scene/fragment.glsl?raw";
-import { degToRad } from "@/utils";
-import {Mesh, Group, Scene, WebGLRender} from '@/core'
+import {Mesh, Group, Scene, WebGLRender, PerspectiveCamera} from '@/core'
 
 export default () => {
   const canvas = document.querySelector("#c") as HTMLCanvasElement;
@@ -52,22 +51,17 @@ export default () => {
   earthOrbit.add(moonOrbit)
   moonOrbit.add(moon)
   scene.add(solarSystem)
-  const projection = twgl.m4.perspective(degToRad(60), canvas.clientWidth / canvas.clientHeight, 1, 2000);
-  const camera = twgl.m4.lookAt([0, 100, 50], [0, 0, 0], [0, 1, 0]);
-  const view = twgl.m4.inverse(camera);
-  const viewProjection = twgl.m4.multiply(projection, view);
+  const camera = new PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 1, 2000)
+  camera.position = twgl.v3.create(0, 100, 50)
 
   function render(time: number) {
     if (!gl) return;
     time *= 0.001;
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     solarSystem.rotation = twgl.v3.create(0, time / 4, 0)
     earthOrbit.rotation = twgl.v3.create(0, time / 2, 0)
     earth.rotation = twgl.v3.create(0, time, 0)
     moon.rotation = twgl.v3.create(0, time, 0)
-    solarSystem.updateWorldMatrix()
-    renderer.render(scene, viewProjection)
+    renderer.render(scene, camera)
     requestAnimationFrame(render)
   }
   requestAnimationFrame(render);
