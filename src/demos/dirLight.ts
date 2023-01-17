@@ -1,24 +1,21 @@
 import * as twgl from "twgl.js";
 import vertexShader from "@/shaders/light/dir/vertex.glsl?raw";
 import fragmentShader from "@/shaders/light/dir/fragment.glsl?raw";
-import { handleResize, degToRad } from "@/utils";
+import {Mesh, WebGLRenderer, Scene, PerspectiveCamera} from '@/core'
 
 export default () => {
   const canvas = document.querySelector("#c") as HTMLCanvasElement;
-  const gl = canvas.getContext("webgl");
-  if (!gl) {
-    return;
-  }
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
+  const renderer = new WebGLRenderer({
+    canvas
+  })
+  const gl = renderer.gl
   twgl.setAttributePrefix('a_')
   const programInfo = twgl.createProgramInfo(gl, [vertexShader, fragmentShader]);
   const vertices  = twgl.primitives.createCubeVertices(2);
   const bufferInfo = twgl.createBufferInfoFromArrays(gl, vertices);
-  const projection = twgl.m4.perspective(degToRad(30), canvas.clientWidth / canvas.clientHeight, 1, 100);
-  const camera = twgl.m4.lookAt([3, 3, 7], [0, 0, 0], [0, 1, 0]);
-  const view = twgl.m4.inverse(camera);
-  const viewProjection = twgl.m4.multiply(projection, view);
+  const scene = new Scene()
+  const camera = new PerspectiveCamera(30, canvas.clientWidth / canvas.clientHeight, 1, 100)
+  camera.position = twgl.v3.create(3, 3, 7)
   const lightPosition = twgl.v3.create(0.5, 3, 4)
 
   const uniforms = {
@@ -28,29 +25,20 @@ export default () => {
     u_lightDirection: twgl.v3.normalize(lightPosition),
   }
 
-  console.log(uniforms)
+  const cube = new Mesh({
+    programInfo,
+    bufferInfo,
+    uniforms
+  })
+
+  scene.add(cube)
 
   function render(time: number) {
     if (!gl) return;
     time *= 0.001;
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    const model = twgl.m4.rotationY(time);
-    // 计算模型矩阵的逆转置矩阵，用于计算变换后的法向量
-    const normalMatrix = twgl.m4.inverse(model);
-    twgl.m4.transpose(normalMatrix, normalMatrix)
-    const mvp = twgl.m4.multiply(viewProjection, model);
-    gl.useProgram(programInfo.program);
-    twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
-    twgl.setUniforms(programInfo, {
-      u_mvpMatrix: mvp,
-      u_normalMatrix: normalMatrix,
-      ...uniforms
-    });
-    twgl.drawBufferInfo(gl, bufferInfo, gl.TRIANGLES);
+    cube.rotation = twgl.v3.create(0, time, 0)
+    renderer.render(scene, camera)
     requestAnimationFrame(render)
   }
-  handleResize(gl);
-  window.addEventListener("resize", handleResize.bind(null, gl));
   requestAnimationFrame(render)
 };

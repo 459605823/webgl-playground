@@ -15,8 +15,6 @@ export class Object3D {
 
   modelViewMatrix: twgl.m4.Mat4 = m4.identity()
 
-  normalMatrix: twgl.m4.Mat4 = m4.identity()
-
   position: twgl.v3.Vec3 = v3.create(0, 0, 0)
 
   rotation: twgl.v3.Vec3 = v3.create(0, 0, 0)
@@ -41,6 +39,10 @@ export class Object3D {
     m4.rotateZ(matrix, this.rotation[2], matrix)
     m4.scale(matrix, this.scale, matrix)
     return matrix
+  }
+
+  get normalMatrix() {
+     return m4.transpose(m4.inverse(this.localMatrix))
   }
 
   updateWorldMatrix() {

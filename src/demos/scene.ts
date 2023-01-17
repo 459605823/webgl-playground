@@ -1,11 +1,11 @@
 import * as twgl from "twgl.js";
 import vertexShader from "@/shaders/scene/vertex.glsl?raw";
 import fragmentShader from "@/shaders/scene/fragment.glsl?raw";
-import {Mesh, Group, Scene, WebGLRender, PerspectiveCamera} from '@/core'
+import {Mesh, Group, Scene, WebGLRenderer, PerspectiveCamera} from '@/core'
 
 export default () => {
   const canvas = document.querySelector("#c") as HTMLCanvasElement;
-  const renderer = new WebGLRender({
+  const renderer = new WebGLRenderer({
      canvas
   })
   const gl = renderer.gl

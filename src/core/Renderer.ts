@@ -14,7 +14,7 @@ function createCanvasElement() {
 	return canvas as HTMLCanvasElement;
 }
 
-class WebGLRender {
+class WebGLRenderer {
   public gl: WebGLRenderingContext
 
   private currentRenderList: Mesh[] = []
@@ -28,7 +28,7 @@ class WebGLRender {
   }
 
   constructor(option: Parameters) {
-    const {canvas, depth, devicePixelRatio} = {...WebGLRender.Options, ...option}
+    const {canvas, depth, devicePixelRatio} = {...WebGLRenderer.Options, ...option}
     const gl = canvas.getContext('webgl') as WebGLRenderingContext
     if (depth) {
       gl.enable(gl.DEPTH_TEST);
@@ -85,6 +85,12 @@ class WebGLRender {
         projectionMatrix: camera.projectionMatrix,
         // 模型视图矩阵
         modelViewMatrix: object.modelViewMatrix,
+        // 模型视图投影矩阵
+        mvpMatrix: twgl.m4.multiply(camera.projectionMatrix, object.modelViewMatrix),
+        // 法向量矩阵
+        normalMatrix: object.normalMatrix,
+        // 相机位置
+        cameraPosition: camera.position,
         ...uniforms
       });
       twgl.drawBufferInfo(gl, bufferInfo, gl.TRIANGLES);
@@ -94,4 +100,4 @@ class WebGLRender {
 
 }
 
-export {WebGLRender}
+export {WebGLRenderer}
