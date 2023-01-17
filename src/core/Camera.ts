@@ -6,6 +6,10 @@ abstract class Camera extends Object3D {
   public projectionMatrix: twgl.m4.Mat4 = twgl.m4.identity()
   public target: twgl.v3.Vec3 = twgl.v3.create(0, 0, 0)
 
+  type = 'Camera'
+
+  isCamera = true
+
   get viewMatrix() {
     return twgl.m4.inverse(twgl.m4.lookAt(this.position, this.target, this.up))
   }
@@ -19,6 +23,10 @@ abstract class Camera extends Object3D {
 
 class PerspectiveCamera extends Camera {
 
+  type = 'PerspectiveCamera'
+
+  isPerspectiveCamera = true
+
   constructor(public fov: number, public aspect: number, public near: number, public far: number) {
     super()
     this.projectionMatrix = twgl.m4.perspective(degToRad(fov), aspect, near, far)
@@ -30,6 +38,10 @@ class PerspectiveCamera extends Camera {
 }
 
 class OrthographicCamera extends Camera {
+
+  type = 'OrthographicCamera'
+
+  isOrthographicCamera = true
 
   constructor(public left: number, public right: number, public bottom: number, public top: number, public near: number, public far: number) {
     super()

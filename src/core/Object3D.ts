@@ -1,9 +1,12 @@
 import * as twgl from 'twgl.js'
+import {generateUUID} from '@/utils'
 
 const {m4, v3} = twgl
 
 export class Object3D {
   type = 'Object3D'
+
+  isObject3D = true
 
   name = ''
 
@@ -28,7 +31,7 @@ export class Object3D {
   visible = true
 
   constructor() {
-    this.uuid = Math.random().toString(36).slice(2)
+    this.uuid = generateUUID()
     this.updateWorldMatrix()
   }
 
@@ -87,6 +90,8 @@ interface drawInfo {
 export class Mesh extends Object3D {
   type = 'Mesh'
 
+  isMesh = true
+
   constructor(public drawInfo: drawInfo) {
     super()
   }
@@ -94,4 +99,6 @@ export class Mesh extends Object3D {
 
 export class Group extends Object3D {
   type = 'Group'
+
+  isGroup = true
 }

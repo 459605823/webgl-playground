@@ -1,5 +1,5 @@
 import {createElementNS} from '@/utils'
-import {Scene, Mesh, Object3D, Camera} from '@/core'
+import {Scene, Mesh, Object3D, Camera, Light} from '@/core'
 import * as twgl from 'twgl.js'
 
 interface Parameters {
@@ -14,10 +14,14 @@ function createCanvasElement() {
 	return canvas as HTMLCanvasElement;
 }
 
+type SceneElements = Mesh | Light | Camera | Object3D
+
 class WebGLRenderer {
   public gl: WebGLRenderingContext
 
   private currentRenderList: Mesh[] = []
+
+  private lights: Light[] = []
 
   devicePixelRatio: number
 
@@ -57,11 +61,28 @@ class WebGLRenderer {
     );
   }
 
-  private projectObject(object: Object3D) {
-    if (object.visible && object.type === 'Mesh') {
-      this.currentRenderList.push(object as Mesh)
+  private projectObject(object: SceneElements) {
+    if (object.visible) {
+      if (object instanceof Mesh && object.isMesh) {
+        this.currentRenderList.push(object)
+      } else if (object instanceof Light && object.isLight) {
+        this.lights.push(object)
+      }
     }
     object.children.forEach(child => this.projectObject(child))
+  }
+
+  private setUpLights() {
+    const uniforms: Record<string, any> = {}
+    this.lights.forEach((light) => {
+      if (light.type === 'DirectionLight') {
+        uniforms.directionLightColor = twgl.v3.mulScalar(light.color, light.intensity)
+        uniforms.directionLightPosition = twgl.v3.normalize(light.position)
+      } else if (light.type === 'AmbientLight') {
+        uniforms.ambientLightColor = twgl.v3.mulScalar(light.color, light.intensity)
+      }
+    })
+    return uniforms
   }
 
   render(scene: Scene, camera: Camera) {
@@ -71,6 +92,15 @@ class WebGLRenderer {
     this.currentRenderList = []
     this.projectObject(scene)
     scene.updateWorldMatrix()
+    const lights = this.setUpLights()
+    const matrixs = {
+      // 视图矩阵
+      viewMatrix: camera.viewMatrix,
+      // 投影矩阵
+      projectionMatrix: camera.projectionMatrix,
+      // 相机位置
+      cameraPosition: camera.position,
+    }
     this.currentRenderList.forEach(object => {
       const {programInfo, bufferInfo, uniforms} = object.drawInfo
       gl.useProgram(programInfo.program);
@@ -79,19 +109,15 @@ class WebGLRenderer {
       twgl.setUniforms(programInfo, {
         // 模型矩阵
         modelMatrix: object.worldMatrix,
-        // 视图矩阵
-        viewMatrix: camera.viewMatrix,
-        // 投影矩阵
-        projectionMatrix: camera.projectionMatrix,
         // 模型视图矩阵
         modelViewMatrix: object.modelViewMatrix,
         // 模型视图投影矩阵
         mvpMatrix: twgl.m4.multiply(camera.projectionMatrix, object.modelViewMatrix),
         // 法向量矩阵
         normalMatrix: object.normalMatrix,
-        // 相机位置
-        cameraPosition: camera.position,
-        ...uniforms
+        ...matrixs,
+        ...lights,
+        ...uniforms,
       });
       twgl.drawBufferInfo(gl, bufferInfo, gl.TRIANGLES);
     })

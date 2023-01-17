@@ -1,7 +1,7 @@
 import * as twgl from "twgl.js";
 import vertexShader from "@/shaders/light/dir/vertex.glsl?raw";
 import fragmentShader from "@/shaders/light/dir/fragment.glsl?raw";
-import {Mesh, WebGLRenderer, Scene, PerspectiveCamera} from '@/core'
+import {Mesh, WebGLRenderer, Scene, PerspectiveCamera, DirectionLight, AmbientLight} from '@/core'
 
 export default () => {
   const canvas = document.querySelector("#c") as HTMLCanvasElement;
@@ -16,13 +16,14 @@ export default () => {
   const scene = new Scene()
   const camera = new PerspectiveCamera(30, canvas.clientWidth / canvas.clientHeight, 1, 100)
   camera.position = twgl.v3.create(3, 3, 7)
-  const lightPosition = twgl.v3.create(0.5, 3, 4)
+  const dirLight = new DirectionLight(twgl.v3.create(1, 1, 1), 1)
+  dirLight.position = twgl.v3.create(0.5, 3, 4)
+  const ambientLight = new AmbientLight(twgl.v3.create(0.2, 0.2, 0.2), 1)
+  scene.add(dirLight)
+  scene.add(ambientLight)
 
   const uniforms = {
     u_color: [1, 0, 0, 1],
-    u_diffuseLight: [1, 1, 1],
-    u_ambientLight: [0.2, 0.2, 0.2],
-    u_lightDirection: twgl.v3.normalize(lightPosition),
   }
 
   const cube = new Mesh({
@@ -38,7 +39,7 @@ export default () => {
     time *= 0.001;
     cube.rotation = twgl.v3.create(0, time, 0)
     renderer.render(scene, camera)
-    requestAnimationFrame(render)
+    // requestAnimationFrame(render)
   }
   requestAnimationFrame(render)
 };
