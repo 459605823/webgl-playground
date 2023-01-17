@@ -68,8 +68,8 @@ class WebGLRenderer {
       } else if (object instanceof Light && object.isLight) {
         this.lights.push(object)
       }
+      object.children.forEach(child => this.projectObject(child))
     }
-    object.children.forEach(child => this.projectObject(child))
   }
 
   private setUpLights() {
